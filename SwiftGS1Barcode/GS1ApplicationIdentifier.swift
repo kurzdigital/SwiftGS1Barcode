@@ -119,12 +119,13 @@ public class GS1ApplicationIdentifier: NSObject{
             else if identifier == "250" { return "Secondary Serial Number" }
             else if identifier == "251" { return "Reference to Source Entity" }
             else if identifier == "310" { return "Product Weight in kg" }
+
             else if identifier == "311" { return "Length in m" }
             else if identifier == "312" { return "Width in m" }
             else if identifier == "313" { return "Height in m" }
             else if identifier == "314" { return "Surface Area in m²" }
-            else if identifier == "315" { return "Net Volume in m³" }
-            else if identifier == "316" { return "Net Weight in kg" }
+            else if identifier == "315" { return "Net Volume in L" }
+            else if identifier == "316" { return "Net Volume in m³" }
             else if identifier == "320" { return "Net Weight in lb" }
             else if identifier == "321" { return "Length in in" }
             else if identifier == "322" { return "Length in ft" }
@@ -140,15 +141,16 @@ public class GS1ApplicationIdentifier: NSObject{
             else if identifier == "332" { return "Width in m" }
             else if identifier == "333" { return "Height in m" }
             else if identifier == "334" { return "Surface Area in m²" }
-            else if identifier == "335" { return "Net Volume in m³" }
+            else if identifier == "335" { return "Logistic Volume" }
             else if identifier == "336" { return "Net Weight in kg" }
-            else if identifier == "337" { return "Gross Weight in kg" }
+            else if identifier == "337" { return "Kg per m²" }
             else if identifier == "340" { return "Gross Volume in m³" }
             else if identifier == "341" { return "Gross Volume in ft³" }
             else if identifier == "342" { return "Net Volume in ft³" }
-            else if identifier == "343" { return "Net Weight in lb" }
-            else if identifier == "344" { return "Gross Weight in lb" }
-            else if identifier == "345" { return "Length in ft" }
+            else if identifier == "343" { return "Length in yd" }
+            else if identifier == "344" { return "Width in in" }
+            else if identifier == "345" { return "Width in ft" }
+
             else if identifier == "392" { return "Price - Single Monetary Area" }
             else if identifier == "393" { return "Price and ISO" }
             else if identifier == "395" { return "Price per UOM" }

@@ -34,13 +34,13 @@ public class GS1Barcode: NSObject, Barcode {
         "numberOfUnitsContained": GS1ApplicationIdentifier("37", length:8, type: .AlphaNumeric, dynamicLength:true),
         // 310n
         "productWeightInKg": GS1ApplicationIdentifier("310", length: 6, type: .NumericDouble),
-        
+                
         "LengthInM": GS1ApplicationIdentifier("311", length: 6, type: .NumericDouble),
         "WidthInM": GS1ApplicationIdentifier("312", length: 6, type: .NumericDouble),
         "HeightInM": GS1ApplicationIdentifier("313", length: 6, type: .NumericDouble),
         "SurfaceAreaInM2": GS1ApplicationIdentifier("314", length: 6, type: .NumericDouble),
-        "NetVolumeInM3": GS1ApplicationIdentifier("315", length: 6, type: .NumericDouble),
-        "NetWeightInKg": GS1ApplicationIdentifier("316", length: 6, type: .NumericDouble),
+        "NetVolumeInL": GS1ApplicationIdentifier("315", length: 6, type: .NumericDouble),
+        "NetVolumeInM3": GS1ApplicationIdentifier("316", length: 6, type: .NumericDouble),
         "NetWeightInLb": GS1ApplicationIdentifier("320", length: 6, type: .NumericDouble),
         "LengthInIn": GS1ApplicationIdentifier("321", length: 6, type: .NumericDouble),
         "LengthInFt": GS1ApplicationIdentifier("322", length: 6, type: .NumericDouble),
@@ -55,16 +55,18 @@ public class GS1Barcode: NSObject, Barcode {
         "LengthInM2": GS1ApplicationIdentifier("331", length: 6, type: .NumericDouble),
         "WidthInM2": GS1ApplicationIdentifier("332", length: 6, type: .NumericDouble),
         "HeightInM2": GS1ApplicationIdentifier("333", length: 6, type: .NumericDouble),
-        "SurfaceAreaInM2": GS1ApplicationIdentifier("334", length: 6, type: .NumericDouble),
-        "NetVolumeInM3": GS1ApplicationIdentifier("335", length: 6, type: .NumericDouble),
+        "AreaInM2": GS1ApplicationIdentifier("334", length: 6, type: .NumericDouble),
+        "LogisticVolume": GS1ApplicationIdentifier("335", length: 6, type: .NumericDouble),
         "NetWeightInKg": GS1ApplicationIdentifier("336", length: 6, type: .NumericDouble),
-        "GrossWeightInKg": GS1ApplicationIdentifier("337", length: 6, type: .NumericDouble),
+        "KgPerM2": GS1ApplicationIdentifier("337", length: 6, type: .NumericDouble),
         "GrossVolumeInM3": GS1ApplicationIdentifier("340", length: 6, type: .NumericDouble),
         "GrossVolumeInFt3": GS1ApplicationIdentifier("341", length: 6, type: .NumericDouble),
         "NetVolumeInFt3": GS1ApplicationIdentifier("342", length: 6, type: .NumericDouble),
-        "NetWeightInLb": GS1ApplicationIdentifier("343", length: 6, type: .NumericDouble),
+        "AdditionalLengthInYd": GS1ApplicationIdentifier("343", length: 6, type: .NumericDouble),
         "GrossWeightInLb": GS1ApplicationIdentifier("344", length: 6, type: .NumericDouble),
-        "LengthInFt": GS1ApplicationIdentifier("345", length: 6, type: .NumericDouble),
+        "AdditionalLengthInFt": GS1ApplicationIdentifier("345", length: 6, type: .NumericDouble),
+        
+
 
         "additionalProductIdentification": GS1ApplicationIdentifier("240", length:30, type: .AlphaNumeric, dynamicLength:true),
         "customerPartNumber": GS1ApplicationIdentifier("241", length:30, type: .AlphaNumeric, dynamicLength:true),
