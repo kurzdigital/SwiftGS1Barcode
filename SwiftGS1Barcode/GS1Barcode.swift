@@ -13,120 +13,189 @@ public class GS1Barcode: NSObject, Barcode {
     public var raw: String?
     /** Stores if the last parsing was successfull */
     private var lastParseSuccessfull: Bool = false
-    
-    // TODO move values to a enum
-    /** Dictionary containing all supported application identifiers */
-    public var applicationIdentifiers = [
-        "serialShippingContainerCode": GS1ApplicationIdentifier("00", length: 18, type: .AlphaNumeric),
-        "gtin": GS1ApplicationIdentifier("01", length: 14, type: .AlphaNumeric),
-        "gtinOfContainedTradeItems": GS1ApplicationIdentifier("02", length: 14, type: .AlphaNumeric),
-        // N2+X..20 (FNC1)
-        "lotNumber": GS1ApplicationIdentifier("10", length: 20, type: .AlphaNumeric, dynamicLength: true),
-        "productionDate": GS1ApplicationIdentifier(dateIdentifier: "11"),
-        "dueDate": GS1ApplicationIdentifier(dateIdentifier: "12"),
-        "packagingDate": GS1ApplicationIdentifier(dateIdentifier: "13"),
-        "bestBeforeDate": GS1ApplicationIdentifier(dateIdentifier: "15"),
-        "expirationDate": GS1ApplicationIdentifier(dateIdentifier: "17"),
-        "productVariant": GS1ApplicationIdentifier("20", length: 2, type: .AlphaNumeric),
-        "serialNumber": GS1ApplicationIdentifier("21", length: 20, type: .AlphaNumeric, dynamicLength: true),
-        "secondaryDataFields": GS1ApplicationIdentifier("22", length:29, type: .AlphaNumeric, dynamicLength:true),
-        "countOfItems": GS1ApplicationIdentifier("30", length: 8, type: .Numeric, dynamicLength: true),
-        "numberOfUnitsContained": GS1ApplicationIdentifier("37", length:8, type: .AlphaNumeric, dynamicLength:true),
-        // 310n
-        "productWeightInKg": GS1ApplicationIdentifier("310", length: 6, type: .NumericDouble),
-                
-        "LengthInM": GS1ApplicationIdentifier("311", length: 6, type: .NumericDouble),
-        "WidthInM": GS1ApplicationIdentifier("312", length: 6, type: .NumericDouble),
-        "HeightInM": GS1ApplicationIdentifier("313", length: 6, type: .NumericDouble),
-        "SurfaceAreaInM2": GS1ApplicationIdentifier("314", length: 6, type: .NumericDouble),
-        "NetVolumeInL": GS1ApplicationIdentifier("315", length: 6, type: .NumericDouble),
-        "NetVolumeInM3": GS1ApplicationIdentifier("316", length: 6, type: .NumericDouble),
-        "NetWeightInLb": GS1ApplicationIdentifier("320", length: 6, type: .NumericDouble),
-        "LengthInIn": GS1ApplicationIdentifier("321", length: 6, type: .NumericDouble),
-        "LengthInFt": GS1ApplicationIdentifier("322", length: 6, type: .NumericDouble),
-        "LengthInYd": GS1ApplicationIdentifier("323", length: 6, type: .NumericDouble),
-        "WidthInIn": GS1ApplicationIdentifier("324", length: 6, type: .NumericDouble),
-        "WidthInFt": GS1ApplicationIdentifier("325", length: 6, type: .NumericDouble),
-        "WidthInYd": GS1ApplicationIdentifier("326", length: 6, type: .NumericDouble),
-        "HeightInIn": GS1ApplicationIdentifier("327", length: 6, type: .NumericDouble),
-        "HeightInFt": GS1ApplicationIdentifier("328", length: 6, type: .NumericDouble),
-        "HeightInYd": GS1ApplicationIdentifier("329", length: 6, type: .NumericDouble),
-        "GrossWeightInKg": GS1ApplicationIdentifier("330", length: 6, type: .NumericDouble),
-        "LengthInM2": GS1ApplicationIdentifier("331", length: 6, type: .NumericDouble),
-        "WidthInM2": GS1ApplicationIdentifier("332", length: 6, type: .NumericDouble),
-        "HeightInM2": GS1ApplicationIdentifier("333", length: 6, type: .NumericDouble),
-        "AreaInM2": GS1ApplicationIdentifier("334", length: 6, type: .NumericDouble),
-        "LogisticVolume": GS1ApplicationIdentifier("335", length: 6, type: .NumericDouble),
-        "NetWeightInKg": GS1ApplicationIdentifier("336", length: 6, type: .NumericDouble),
-        "KgPerM2": GS1ApplicationIdentifier("337", length: 6, type: .NumericDouble),
-        "GrossVolumeInM3": GS1ApplicationIdentifier("340", length: 6, type: .NumericDouble),
-        "GrossVolumeInFt3": GS1ApplicationIdentifier("341", length: 6, type: .NumericDouble),
-        "NetVolumeInFt3": GS1ApplicationIdentifier("342", length: 6, type: .NumericDouble),
-        "AdditionalLengthInYd": GS1ApplicationIdentifier("343", length: 6, type: .NumericDouble),
-        "GrossWeightInLb": GS1ApplicationIdentifier("344", length: 6, type: .NumericDouble),
-        "AdditionalLengthInFt": GS1ApplicationIdentifier("345", length: 6, type: .NumericDouble),
-        
 
+    /** Array containing all supported application identifiers */
+    public var applicationIdentifiers: [GS1ApplicationIdentifier] = [
+        GS1ApplicationIdentifier("00", "Serial Shipping Container Code", length: 18, type: .AlphaNumeric),
+        GS1ApplicationIdentifier("01", "GTIN", length: 14, type: .AlphaNumeric),
+        GS1ApplicationIdentifier("02", "GTIN of Contained Trade Items", length: 14, type: .AlphaNumeric),
+        GS1ApplicationIdentifier("10", "Lot Number", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("11", "Production Date", length: 6, type: .Date),
+        GS1ApplicationIdentifier("12", "Due Date", length: 6, type: .Date),
+        GS1ApplicationIdentifier("13", "Packaging Date", length: 6, type: .Date),
+        GS1ApplicationIdentifier("15", "Best Before Date", length: 6, type: .Date),
+        GS1ApplicationIdentifier("16", "SellByDate", length: 6, type: .Date),
+        GS1ApplicationIdentifier("17", "Expiration Date", length: 6, type: .Date),
 
-        "additionalProductIdentification": GS1ApplicationIdentifier("240", length:30, type: .AlphaNumeric, dynamicLength:true),
-        "customerPartNumber": GS1ApplicationIdentifier("241", length:30, type: .AlphaNumeric, dynamicLength:true),
-        "madeToOrderVariationNumber": GS1ApplicationIdentifier("242", length:6, type: .AlphaNumeric, dynamicLength:true),
-        "secondarySerialNumber": GS1ApplicationIdentifier("250", length:30, type: .AlphaNumeric, dynamicLength:true),
-        "referenceToSourceEntity": GS1ApplicationIdentifier("251", length:30, type: .AlphaNumeric, dynamicLength:true),
-        // 392n
-        "priceSingleMonetaryArea": GS1ApplicationIdentifier("392", length:15, type: .NumericDouble, dynamicLength:true),
-        // 393n
-        "priceAndISO": GS1ApplicationIdentifier("393", length:18, type: .NumericDouble, dynamicLength:true),
-        // 395n
-        "pricePerUOM": GS1ApplicationIdentifier("395", length:6, type: .NumericDouble, dynamicLength:true),
-        "countryOfOrigin": GS1ApplicationIdentifier("422", length:3, type: .AlphaNumeric, dynamicLength:true),
-        // N3+X..20 (FNC1)
-        "nhrnAIM": GS1ApplicationIdentifier("714", length:20, type: .AlphaNumeric, dynamicLength:true),
-        // N4+X..70 (FNC1)
-        "extendedPackagingURL": GS1ApplicationIdentifier("8200", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("20", "Product Variant", length: 2, type: .AlphaNumeric),
+        GS1ApplicationIdentifier("21", "Serial Number", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("22", "Secondary Data Fields", length: 29, type: .AlphaNumeric, dynamicLength: true),
+
+        GS1ApplicationIdentifier("235", "Serialised Extension of GTIN (TPX)", length: 28, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("240", "Additional Product Identification", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("241", "Customer Part Number", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("242", "Made-to-Order Variation Number", length: 6, type: .Numeric),
+        GS1ApplicationIdentifier("243", "Packaging Component Number", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("250", "Secondary Serial Number", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("251", "Reference to Source Entity", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("253", "Global Document Type Identifier (GDTI)", length: 17, type: .AlphaNumeric),
+        GS1ApplicationIdentifier("254", "GLN Extension Component", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("255", "Global Coupon Number (GCN)", length: 12, type: .Numeric),
+
+        GS1ApplicationIdentifier("30", "Count of Items", length: 8, type: .Numeric, dynamicLength: true),
+        GS1ApplicationIdentifier("37", "Number of Units Contained", length: 8, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("310", "Product Weight in kg", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("311", "Length in m", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("312", "Width in m", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("313", "Height in m", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("314", "Surface Area in m²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("315", "Net Volume in L", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("316", "Net Volume in m³", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("320", "Net Weight in lb", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("321", "Length in in", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("322", "Length in ft", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("323", "Length in yd", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("324", "Width in in", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("325", "Width in ft", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("326", "Width in yd", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("327", "Height in in", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("328", "Height in ft", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("329", "Height in yd", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("330", "Gross Weight in kg", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("331", "Length in m", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("332", "Width in m", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("333", "Height in m", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("334", "Surface Area in m²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("335", "Logistic Volume", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("336", "Net Weight in kg", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("337", "Kg per m²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("340", "Gross Volume in m³", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("341", "Gross Volume in ft³", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("342", "Net Volume in ft³", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("343", "Length in yd", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("344", "Width in in", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("345", "Width in ft", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("346", "Width in yd", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("347", "Height in in", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("348", "Height in ft", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("349", "Height in yd", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("350", "Area in in²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("351", "Area in ft²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("352", "Area in yd²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("353", "Area in in²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("354", "Area in ft²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("355", "Area in yd²", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("356", "Net weight, troy ounces", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("357", "Net weight, ounces", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("360", "Net volume, quarts", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("361", "Net volume, gallons U.S.", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("362", "Logistic volume, quarts", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("363", "Logistic volume, gallons U.S.", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("364", "Net volume, cubic inches", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("365", "Net volume, cubic feet", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("366", "Net volume, cubic yards", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("367", "Logistic volume, cubic inches", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("368", "Logistic volume, cubic feet", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("369", "Logistic volume, cubic yards", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("390", "Coupon value, local currency", length: 15, type: .NumericDouble, dynamicLength: true),
+        GS1ApplicationIdentifier("391", "Amount payable, ISO currency", length: 15, type: .NumericDouble, dynamicLength: true),
+        GS1ApplicationIdentifier("392", "Price - Single Monetary Area", length: 15, type: .NumericDouble, dynamicLength: true),
+        GS1ApplicationIdentifier("393", "Amount payable, ISO currency", length: 15, type: .NumericDouble, dynamicLength: true),
+        GS1ApplicationIdentifier("394", "Coupon discount percentage", length: 6, type: .NumericDouble),
+        GS1ApplicationIdentifier("395", "Price per UOM", length: 6, type: .NumericDouble),
+
+        GS1ApplicationIdentifier("400", "Customer Purchase Order Number", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("401", "Global Identification Number for Consignment (GINC)", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("402", "Global Shipment Identification Number (GSIN)", length: 17, type: .Numeric),
+        GS1ApplicationIdentifier("403", "Routing Code", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("410", "Ship to / Deliver to GLN", length: 13, type: .Numeric),
+        GS1ApplicationIdentifier("411", "Bill to / Invoice to GLN", length: 13, type: .Numeric),
+        GS1ApplicationIdentifier("412", "Purchased from GLN", length: 13, type: .Numeric),
+        GS1ApplicationIdentifier("413", "Ship for / Deliver for - Forward to GLN", length: 13, type: .Numeric),
+        GS1ApplicationIdentifier("414", "Identification of a Physical Location - GLN", length: 13, type: .Numeric),
+        GS1ApplicationIdentifier("415", "GLN of the Invoicing Party", length: 13, type: .Numeric),
+        GS1ApplicationIdentifier("416", "GLN of the Production or Service Location", length: 13, type: .Numeric),
+        GS1ApplicationIdentifier("417", "Party GLN", length: 13, type: .Numeric),
+        GS1ApplicationIdentifier("420", "Ship to / Deliver to Postal Code within a Single Postal Authority", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("421", "Ship to / Deliver to Postal Code with ISO Country Code", length: 9, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("422", "Country of Origin", length: 3, type: .AlphaNumeric),
+        GS1ApplicationIdentifier("423", "Country of Initial Processing", length: 12, type: .Numeric),
+        GS1ApplicationIdentifier("424", "Country of Processing", length: 3, type: .Numeric),
+        GS1ApplicationIdentifier("425", "Country of Disassembly", length: 12, type: .Numeric),
+        GS1ApplicationIdentifier("426", "Country Covering Full Process Chain", length: 3, type: .Numeric),
+        GS1ApplicationIdentifier("427", "Country Subdivision of Origin", length: 3, type: .AlphaNumeric, dynamicLength: true),
+
+        GS1ApplicationIdentifier("4300", "Ship-to/Deliver-to Company Name", length: 35, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4301", "Ship-to/Deliver-to Contact", length: 35, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4302", "Ship-to/Deliver-to Address Line 1", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4303", "Ship-to/Deliver-to Address Line 2", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4304", "Ship-to/Deliver-to Suburb", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4305", "Ship-to/Deliver-to Locality", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4306", "Ship-to/Deliver-to Region", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4307", "Ship-to/Deliver-to Country Code", length: 2, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4308", "Ship-to/Deliver-to Telephone Number", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4309", "Ship-to/Deliver-to GEO Location", length: 20, type: .Numeric),
+        GS1ApplicationIdentifier("4310", "Return-to Company Name", length: 35, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4311", "Return-to Contact", length: 35, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4312", "Return-to Address Line 1", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4313", "Return-to Address Line 2", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4314", "Return-to Suburb", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4315", "Return-to Locality", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4316", "Return-to Region", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4317", "Return-to Country Code", length: 2, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4318", "Return-to Postal Code", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4319", "Return-to Telephone Number", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4320", "Service Code Description", length: 35, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("4321", "Dangerous Goods Flag", length: 1, type: .Numeric),
+        GS1ApplicationIdentifier("4322", "Authority to Leave", length: 1, type: .Numeric),
+        GS1ApplicationIdentifier("4323", "Signature Required Flag", length: 1, type: .Numeric),
+        GS1ApplicationIdentifier("4324", "Not Before Delivery Date Time", length: 10, type: .Numeric),
+        GS1ApplicationIdentifier("4325", "Not After Delivery Date Time", length: 10, type: .Numeric),
+        GS1ApplicationIdentifier("4326", "Release Date", length: 6, type: .Numeric),
+
+        GS1ApplicationIdentifier("710", "NHRN - Germany PZN", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("711", "NHRN - France CIP", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("712", "NHRN - Spain CN", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("713", "NHRN - Brasil DRN", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("714", "NHRN - Portugal AIM", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("715", "NHRN - United States of America NDC", length: 20, type: .AlphaNumeric, dynamicLength: true),
+
+        GS1ApplicationIdentifier("8001", "Roll Products", length: 14, type: .Numeric),
+        GS1ApplicationIdentifier("8002", "Cellular Mobile Telephone Identifier", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8003", "GRAI", length: 14, type: .Numeric),
+        GS1ApplicationIdentifier("8004", "GIAI", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8005", "Price per Unit of Measure", length: 6, type: .Numeric),
+        GS1ApplicationIdentifier("8006", "ITIP", length: 18, type: .Numeric),
+        GS1ApplicationIdentifier("8007", "IBAN", length: 34, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8008", "Date and Time of Production", length: 8, type: .Numeric),
+        GS1ApplicationIdentifier("8009", "Optically Readable Sensor Indicator", length: 50, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8010", "CPID", length: 30, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8011", "CPID Serial Number", length: 12, type: .Numeric),
+        GS1ApplicationIdentifier("8012", "Software Version", length: 20, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8013", "GMN", length: 25, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8017", "GSRN (Provider)", length: 18, type: .Numeric),
+        GS1ApplicationIdentifier("8018", "GSRN (Recipient)", length: 18, type: .Numeric),
+        GS1ApplicationIdentifier("8019", "SRIN", length: 10, type: .Numeric),
+        GS1ApplicationIdentifier("8020", "Payment Slip Reference Number", length: 25, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8026", "ITIP in Logistic Unit", length: 18, type: .Numeric),
+        GS1ApplicationIdentifier("8110", "Coupon Code Identification for North America", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8111", "Loyalty Points of a Coupon", length: 4, type: .Numeric),
+        GS1ApplicationIdentifier("8112", "Paperless Coupon Code for North America", length: 70, type: .AlphaNumeric, dynamicLength: true),
+        GS1ApplicationIdentifier("8200", "Extended Packaging URL", length: 70, type: .AlphaNumeric, dynamicLength: true)
     ]
-    /** Dictionary containing all application identifiers that have a value  */
-    var filledApplicationIdentifiers: [String: GS1ApplicationIdentifier]{
+
+
+    /** Array containing all application identifiers that have a value  */
+    public var filledApplicationIdentifiers: [GS1ApplicationIdentifier]{
         get{
-            return self.applicationIdentifiers.filter{ $0.value.rawValue != nil }
+            return self.applicationIdentifiers.filter{ $0.rawValue != nil }
         }
     }
-    
-    /** Mapping for User Friendly Usage */
-    public var serialShippingContainerCode: String? {get{return applicationIdentifiers["serialShippingContainerCode"]!.stringValue}}
-    public var gtin: String?{ get {return applicationIdentifiers["gtin"]!.stringValue} }
-    public var gtinOfContainedTradeItems: String? {get{return applicationIdentifiers["gtinOfContainedTradeItems"]!.stringValue}}
-    public var lotNumber: String?{ get {return applicationIdentifiers["lotNumber"]!.stringValue} }
-    public var productionDate: Date? {get{return applicationIdentifiers["productionDate"]!.dateValue}}
-    public var dueDate: Date? {get{return applicationIdentifiers["dueDate"]!.dateValue}}
-    public var packagingDate: Date? {get{return applicationIdentifiers["packagingDate"]!.dateValue}}
-    public var bestBeforeDate: Date? {get{return applicationIdentifiers["bestBeforeDate"]!.dateValue}}
-    public var expirationDate: Date?{ get {return applicationIdentifiers["expirationDate"]!.dateValue} }
-    public var productVariant: String? {get{return applicationIdentifiers["productVariant"]!.stringValue}}
-    public var serialNumber: String?{ get {return applicationIdentifiers["serialNumber"]!.stringValue} }
-    public var secondaryDataFields: String? {get{return applicationIdentifiers["secondaryDataFields"]!.stringValue}}
-    public var countOfItems: Int?{ get {return applicationIdentifiers["countOfItems"]!.intValue} }
-    public var numberOfUnitsContained: String? {get{return applicationIdentifiers["numberOfUnitsContained"]!.stringValue}}
-    public var productWeightInKg: Double? {get{return applicationIdentifiers["productWeightInKg"]!.doubleValue}}
-    
-    public var additionalProductIdentification: String? {get{return applicationIdentifiers["additionalProductIdentification"]!.stringValue}}
-    public var customerPartNumber: String? {get{return applicationIdentifiers["customerPartNumber"]!.stringValue}}
-    public var madeToOrderVariationNumber: String? {get{return applicationIdentifiers["madeToOrderVariationNumber"]!.stringValue}}
-    public var secondarySerialNumber: String? {get{return applicationIdentifiers["secondarySerialNumber"]!.stringValue}}
-    public var referenceToSourceEntity: String? {get{return applicationIdentifiers["referenceToSourceEntity"]!.stringValue}}
-    public var priceSingleMonetaryArea: Double? {get{return applicationIdentifiers["priceSingleMonetaryArea"]!.doubleValue}}
-    public var priceAndISO: Double? {get{return applicationIdentifiers["priceAndISO"]!.doubleValue}}
-    public var pricePerUOM: Double? {get{return applicationIdentifiers["pricePerUOM"]!.doubleValue}}
-    public var countryOfOrigin: String? {get{return applicationIdentifiers["countryOfOrigin"]!.stringValue}}
-    public var nationalHealthcareReimbursementNumberAIM: String? {get{return applicationIdentifiers["nhrnAIM"]!.stringValue}}
-    public var extendedPackagingURL: String?{ get {return applicationIdentifiers["extendedPackagingURL"]!.stringValue} }
-    
-    
-    
+
     required override public init() {
         super.init()
     }
-    
+
     /** Init barcode with string and parse it */
     required public init(raw: String) {
         super.init()
@@ -135,20 +204,19 @@ public class GS1Barcode: NSObject, Barcode {
         // Parsing Barcode
         try? parse()
     }
-    
-    required public init(raw: String, customApplicationIdentifiers: [String: GS1ApplicationIdentifier]) {
+
+    required public init(raw: String, customApplicationIdentifiers: [GS1ApplicationIdentifier]) {
         super.init()
         // Setting Original Data
         self.raw = raw
-        
+
         // Adding Custom Application Identifiers
-        for ai in customApplicationIdentifiers{
-            self.applicationIdentifiers[ai.key] = ai.value
-        }
+        self.applicationIdentifiers.append(contentsOf: customApplicationIdentifiers)
+
         // Parsing Barcode
         try? parse()
     }
-    
+
     /** Validating if the barcode got parsed correctly **/
     public func validate() throws -> Bool {
         if raw == nil{
@@ -158,7 +226,7 @@ public class GS1Barcode: NSObject, Barcode {
         if raw == "" {
             throw GS1BarcodeErrors.ValidationError.barcodeEmpty
         }
-        if raw!.replacingOccurrences(of: "\u{1d}", with: "").range(of: #"^\d+[a-zA-Z0-9äöüÄÖU/\\@#\-]*$"#, options: .regularExpression) == nil {
+        if raw!.replacingOccurrences(of: "\u{1D}", with: "").range(of: #"^\d+[a-zA-Z0-9äöüÄÖU/\\@#\-]*$"#, options: .regularExpression) == nil {
             throw GS1BarcodeErrors.ValidationError.unallowedCharacter
         }
         if !lastParseSuccessfull{
@@ -166,7 +234,7 @@ public class GS1Barcode: NSObject, Barcode {
         }
         return true
     }
-    
+
     private func parseApplicationIdentifier(_ ai: GS1ApplicationIdentifier, data: inout String) throws{
         if(data.startsWith(ai.identifier)){
             // This can throw an error! Make sure data setting is like expected
@@ -181,7 +249,7 @@ public class GS1Barcode: NSObject, Barcode {
             print("The data didn't start with the expected Application Identifier \(ai.identifier)")
         }
     }
-    
+
     @available(*, deprecated, message: "Please use the function parse() to parse a barcode")
     /** Temporary function, to allow a smooth transition of the legacy parse function */
     public func tryParse() -> Bool{
@@ -191,54 +259,56 @@ public class GS1Barcode: NSObject, Barcode {
         }catch{
             return false
         }
-        
+
     }
-    
-    public func parse() throws{
+
+    public func parse() throws {
         self.lastParseSuccessfull = false
         var data = raw
-        
-        if data != nil{
+
+        if data != nil {
             while data!.count > 0 {
-                // Removing Group Seperator from the beginning of the string
+                // Removing Group Separator from the beginning of the string
                 if(data!.startsWith("\u{1D}")){
-                    data = data!.substring(from: 1)
+                    data = String(data!.dropFirst())
                 }
-                
-                // Checking the AIs by it's identifier and passing it to the Barcode Parser to get the value and cut the data
+
                 var foundOne = false
-                for (_, applicationIdentifier) in applicationIdentifiers {
-                    // Exclude the gtinIndicatorDigit, because it get's added later for the gtin identifier
-                    // If could parse ai, continue and do the loop once again
-                    // Keep syntax like that! foundOne should and continue should only be set if no error was thrown
-                    do{
-                        if(data!.startsWith(applicationIdentifier.identifier)){
-                            try parseApplicationIdentifier(applicationIdentifier, data: &data!)
+                for ai in applicationIdentifiers {
+                    do {
+                        if(data!.startsWith(ai.identifier)){
+                            try parseApplicationIdentifier(ai, data: &data!)
                             foundOne = true
-                            continue
+                            break
                         }
-                    }catch{
-                        foundOne = false
-                    }
-                    if data!.count == 0 { break }
-                    
-                }
-                
-                // If didn't find anything, remove the whole string until the next group seperator
-                // Then do one more iteration
-                if data!.count != 0 && !foundOne && data!.contains("\u{1D}"){
-                    if let index = data!.index(of: "\u{1D}"){
-                        data = String(data!.suffix(from: index))
-                        foundOne = true
+                    } catch {
+                        // Error handling if parsing fails
+                        debugPrint("ERROR: \(error.localizedDescription)")
+                        // Continue the loop to check for other AIs
                     }
                 }
-                
-                // If no ai was found return false and keep the lastParseSuccessfull to false -> This will make validate() fail as well
-                if !foundOne{
-                    throw GS1BarcodeErrors.ParseError.didNotFoundApplicationIdentifier
+
+                // If no known AI was found, remove the unknown AI and continue parsing
+                if !foundOne {
+                    data = removeUnknownAI(from: data!)
+                }
+
+                // Break the loop if no data is left to parse
+                if data!.isEmpty {
+                    break
                 }
             }
         }
         self.lastParseSuccessfull = true
+    }
+
+    private func removeUnknownAI(from string: String) -> String {
+        // Custom logic to remove unknown AI from the string
+        // For simplicity, let's remove up to the next Group Separator or end of the string
+        if let range = string.range(of: "\u{1D}") {
+            return String(string[range.lowerBound...])
+        } else {
+            return ""
+        }
     }
 }
