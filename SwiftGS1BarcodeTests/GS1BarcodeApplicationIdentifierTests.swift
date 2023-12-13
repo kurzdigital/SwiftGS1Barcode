@@ -209,19 +209,19 @@ class GS1BarcodeApplicationIdentifierTests: GS1BarcodeParserXCTestCase {
         let barcode = GS1Barcode(raw: "3101234567")
         XCTAssertNotNil(barcode.productWeightInKg)
         XCTAssertEqual(barcode.productWeightInKg, 23456.7)
-        XCTAssertEqual(barcode.applicationIdentifiers["productWeightInKg"]?.decimalPlaces, 1)
+        XCTAssertEqual(barcode.findApplicationIdentifier(byReadableId: "Product Weight in kg")?.decimalPlaces, 1)
     }
     func testProductWeightInKgTwo(){
         let barcode = GS1Barcode(raw: "3102234567")
         XCTAssertNotNil(barcode.productWeightInKg)
         XCTAssertEqual(barcode.productWeightInKg, 2345.67)
-        XCTAssertEqual(barcode.applicationIdentifiers["productWeightInKg"]?.decimalPlaces, 2)
+        XCTAssertEqual(barcode.findApplicationIdentifier(byReadableId: "Product Weight in kg")?.decimalPlaces, 2)
     }
     func testProductWeightInKgFive(){
         let barcode = GS1Barcode(raw: "3105234567")
         XCTAssertNotNil(barcode.productWeightInKg)
         XCTAssertEqual(barcode.productWeightInKg, 2.34567)
-        XCTAssertEqual(barcode.applicationIdentifiers["productWeightInKg"]?.decimalPlaces, 5)
+        XCTAssertEqual(barcode.findApplicationIdentifier(byReadableId: "Product Weight in kg")?.decimalPlaces, 5)
     }
     
     func testAdditionalProductIdentification(){
@@ -258,21 +258,21 @@ class GS1BarcodeApplicationIdentifierTests: GS1BarcodeParserXCTestCase {
         let barcode = GS1Barcode(raw: "3924123456789012345")
         XCTAssertNotNil(barcode.priceSingleMonetaryArea)
         XCTAssertEqual(barcode.priceSingleMonetaryArea, 12345678901.2345)
-        XCTAssertEqual(barcode.applicationIdentifiers["priceSingleMonetaryArea"]?.decimalPlaces, 4)
+        XCTAssertEqual(barcode.findApplicationIdentifier(byReadableId: "Price - Single Monetary Area")?.decimalPlaces, 4)
     }
     
     func testpriceAndISO(){
-        let barcode = GS1Barcode(raw: "3931123456789012345678")
+        let barcode = GS1Barcode(raw: "3931123456789012345")
         XCTAssertNotNil(barcode.priceAndISO)
-        XCTAssertEqual(barcode.priceAndISO, 12345678901234567.8)
-        XCTAssertEqual(barcode.applicationIdentifiers["priceAndISO"]?.decimalPlaces, 1)
+        XCTAssertEqual(barcode.priceAndISO, 12345678901234.5)
+        XCTAssertEqual(barcode.findApplicationIdentifier(by: "393")?.decimalPlaces, 1)
     }
     
     func testpricePerUOM(){
         let barcode = GS1Barcode(raw: "3951123456")
         XCTAssertNotNil(barcode.pricePerUOM)
         XCTAssertEqual(barcode.pricePerUOM, 12345.6)
-        XCTAssertEqual(barcode.applicationIdentifiers["pricePerUOM"]?.decimalPlaces, 1)
+        XCTAssertEqual(barcode.findApplicationIdentifier(byReadableId: "Price per UOM")?.decimalPlaces, 1)
     }
     func testcountryOfOrigin(){
         let barcode = GS1Barcode(raw: "422GER")

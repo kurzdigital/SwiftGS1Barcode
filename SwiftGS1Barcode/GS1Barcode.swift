@@ -34,7 +34,7 @@ public class GS1Barcode: NSObject, Barcode {
         GS1ApplicationIdentifier("235", "Serialised Extension of GTIN (TPX)", length: 28, type: .AlphaNumeric, dynamicLength: true),
         GS1ApplicationIdentifier("240", "Additional Product Identification", length: 30, type: .AlphaNumeric, dynamicLength: true),
         GS1ApplicationIdentifier("241", "Customer Part Number", length: 30, type: .AlphaNumeric, dynamicLength: true),
-        GS1ApplicationIdentifier("242", "Made-to-Order Variation Number", length: 6, type: .Numeric),
+        GS1ApplicationIdentifier("242", "Made-to-Order Variation Number", length: 6, type: .AlphaNumeric),
         GS1ApplicationIdentifier("243", "Packaging Component Number", length: 20, type: .AlphaNumeric, dynamicLength: true),
         GS1ApplicationIdentifier("250", "Secondary Serial Number", length: 30, type: .AlphaNumeric, dynamicLength: true),
         GS1ApplicationIdentifier("251", "Reference to Source Entity", length: 30, type: .AlphaNumeric, dynamicLength: true),
@@ -279,6 +279,9 @@ public class GS1Barcode: NSObject, Barcode {
                         if(data!.startsWith(ai.identifier)){
                             try parseApplicationIdentifier(ai, data: &data!)
                             foundOne = true
+
+                            // here, at least one AI was parsed successfull
+                            self.lastParseSuccessfull = true
                             break
                         }
                     } catch {
@@ -299,7 +302,6 @@ public class GS1Barcode: NSObject, Barcode {
                 }
             }
         }
-        self.lastParseSuccessfull = true
     }
 
     private func removeUnknownAI(from string: String) -> String {
@@ -311,4 +313,43 @@ public class GS1Barcode: NSObject, Barcode {
             return ""
         }
     }
+}
+
+
+extension GS1Barcode {
+    public func findApplicationIdentifier(by id: String) -> GS1ApplicationIdentifier? {
+        return applicationIdentifiers.first(where: { $0.identifier == id })
+    }
+
+    public func findApplicationIdentifier(byReadableId: String) -> GS1ApplicationIdentifier? {
+        return applicationIdentifiers.first(where: { $0.readableIdentifier == byReadableId })
+    }
+
+    public var serialShippingContainerCode: String? { findApplicationIdentifier(by: "00")?.stringValue }
+    public var gtin: String? { findApplicationIdentifier(by: "01")?.stringValue }
+    public var gtinOfContainedTradeItems: String? { findApplicationIdentifier(by: "02")?.stringValue }
+    public var lotNumber: String? { findApplicationIdentifier(by: "10")?.stringValue }
+    public var productionDate: Date? { findApplicationIdentifier(by: "11")?.dateValue }
+    public var dueDate: Date? { findApplicationIdentifier(by: "12")?.dateValue }
+    public var packagingDate: Date? { findApplicationIdentifier(by: "13")?.dateValue }
+    public var bestBeforeDate: Date? { findApplicationIdentifier(by: "15")?.dateValue }
+    public var expirationDate: Date? { findApplicationIdentifier(by: "17")?.dateValue }
+    public var productVariant: String? { findApplicationIdentifier(by: "20")?.stringValue }
+    public var serialNumber: String? { findApplicationIdentifier(by: "21")?.stringValue }
+    public var secondaryDataFields: String? { findApplicationIdentifier(by: "22")?.stringValue }
+    public var countOfItems: Int? { findApplicationIdentifier(by: "30")?.intValue }
+    public var numberOfUnitsContained: String? { findApplicationIdentifier(by: "37")?.stringValue }
+    public var productWeightInKg: Double? { findApplicationIdentifier(by: "310")?.doubleValue }
+
+    public var additionalProductIdentification: String? { findApplicationIdentifier(by: "240")?.stringValue }
+    public var customerPartNumber: String? { findApplicationIdentifier(by: "241")?.stringValue }
+    public var madeToOrderVariationNumber: String? { findApplicationIdentifier(by: "242")?.stringValue }
+    public var secondarySerialNumber: String? { findApplicationIdentifier(by: "250")?.stringValue }
+    public var referenceToSourceEntity: String? { findApplicationIdentifier(by: "251")?.stringValue }
+    public var priceSingleMonetaryArea: Double? { findApplicationIdentifier(by: "392")?.doubleValue }
+    public var priceAndISO: Double? { findApplicationIdentifier(by: "393")?.doubleValue }
+    public var pricePerUOM: Double? { findApplicationIdentifier(by: "395")?.doubleValue }
+    public var countryOfOrigin: String? { findApplicationIdentifier(by: "422")?.stringValue }
+    public var nationalHealthcareReimbursementNumberAIM: String? { findApplicationIdentifier(by: "714")?.stringValue }
+    public var extendedPackagingURL: String? { findApplicationIdentifier(by: "8200")?.stringValue }
 }
